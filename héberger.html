@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz</title>
+  <style>
+    :root{
+      --panel-bg: rgba(255,255,255,0.95);
+      --accent: #b30000;
+      --green-q: #0b6623; /* questions en vert */
+    }
+    html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif;background:#0b2233;}
+
+    /* Fond noël - image + overlay warm */
+    body{
+      background-image: url('https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1350&q=80');
+      background-size:cover;background-position:center;display:flex;align-items:flex-start;justify-content:center;padding:30px;overflow:auto;
+    }
+
+    /* Conteneur principal */
+    #container{
+      width:min(1000px,96%);
+      background:var(--panel-bg);
+      border-radius:14px;padding:22px 26px;box-shadow:0 10px 30px rgba(2,8,8,0.6);position:relative;z-index:2;
+    }
+
+    h1{color:var(--accent);text-align:center;margin:0 0 12px 0}
+
+    /* Questions */
+    .question{
+      background:white;padding:14px;border-radius:10px;margin-bottom:12px;box-shadow:0 2px 6px rgba(0,0,0,0.08);
+    }
+    .question p{color:var(--green-q);font-weight:700;margin:0 0 8px 0}
+    .question.wrong{border-left:6px solid #e74c3c;background:#fff6f6}
+    .question.wrong p,.question.wrong label{color:#b22222}
+
+    /* Bouton */
+    #submitBtn{background:var(--accent);color:white;border:none;padding:12px 18px;border-radius:10px;font-size:16px;cursor:pointer}
+    #submitBtn:focus{outline:3px solid rgba(179,0,0,0.25)}
+
+    /* Modal (fenêtre) pour messages */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:50}
+    .modal{background:white;border-radius:12px;padding:20px;max-width:520px;width:90%;box-shadow:0 18px 50px rgba(0,0,0,0.6);text-align:center}
+    .modal h2{margin:0 0 8px 0}
+    .modal p{margin:8px 0 0 0}
+    .modal button{margin-top:14px}
+
+    /* Snow flakes */
+    .snowflake{position:fixed;top:-50px;z-index:1;pointer-events:none;user-select:none}
+
+    @keyframes fall{
+      to{transform:translateY(120vh) rotate(360deg)}
+    }
+
+    @keyframes sway{
+      0%{transform:translateX(0)}
+      50%{transform:translateX(20px)}
+      100%{transform:translateX(0)}
+    }
+
+    /* Responsive */
+    @media (max-width:600px){#container{padding:14px}}
+  
+  /* Neige qui tombe */
+  .snowflake {
+    position: fixed;
+    top: -10px;
+    color: white;
+    font-size: 1em;
+    user-select: none;
+    pointer-events: none;
+    animation-name: fall;
+    animation-timing-function: linear;
+    z-index: 9999;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh); }
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    background-image: url('https://images.unsplash.com/photo-1601597111158-9b60a6e9ab66?auto=format&fit=crop&w=1350&q=80');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+  .quiz-container, .container, form {
+    background: rgba(255, 255, 255, 0.75);
+    padding: 20px;
+    border-radius: 12px;
+  }
+</style>
+</head>
+<body>
+  <div id="container" role="main">
+    <h1 class="text-4xl font-bold text-center mb-6 text-white">Kitchen Safety Quiz</h1>
+
+    <!-- Attempts element kept but hidden (we removed the initial phrase display) -->
+    <div id="attempts" style="display:none;" aria-live="polite"></div>
+
+    <form id="quizForm">
+
+      <!-- (Questions inchangées, écrites en français comme dans l'original) -->
+
+      <div class="question" data-q="1">
+        <p>1. Mom sees smoke coming from the oven. What should she do first?</p>
+        <label><input type="radio" name="q1" value="0"> Throw water into the oven</label><br>
+        <label><input type="radio" name="q1" value="1"> Stay calm and turn off the oven</label><br>
+        <label><input type="radio" name="q1" value="0"> Open all the cupboards</label><br>
+        <label><input type="radio" name="q1" value="0"> Hit the oven with a spoon</label>
+      </div>
+
+      <div class="question" data-q="2">
+        <p>2. Mom wants to reduce the smoke in the kitchen. What is the best action?</p>
+        <label><input type="radio" name="q2" value="0"> Wave a towel at the smoke</label><br>
+        <label><input type="radio" name="q2" value="1"> Open a window</label><br>
+        <label><input type="radio" name="q2" value="0"> Leave the smoke inside</label><br>
+        <label><input type="radio" name="q2" value="0"> Spray perfume</label>
+      </div>
+
+      <div class="question" data-q="3">
+        <p>3. The smoke detector is beeping. What does this mean?</p>
+        <label><input type="radio" name="q3" value="0"> It is out of batteries</label><br>
+        <label><input type="radio" name="q3" value="0"> There is too much noise</label><br>
+        <label><input type="radio" name="q3" value="1"> It has detected smoke</label><br>
+        <label><input type="radio" name="q3" value="0"> It is lunchtime</label>
+      </div>
+
+      <div class="question" data-q="4">
+        <p>4. When should you use a fire extinguisher?</p>
+        <label><input type="radio" name="q4" value="0"> When cookies are burned but no fire</label><br>
+        <label><input type="radio" name="q4" value="1"> Only if there are visible flames</label><br>
+        <label><input type="radio" name="q4" value="0"> When the oven is dirty</label><br>
+        <label><input type="radio" name="q4" value="0"> To cool down the kitchen</label>
+      </div>
+
+      <div class="question" data-q="5">
+        <p>5. If a small fire appears inside the oven, what should Mom do?</p>
+        <label><input type="radio" name="q5" value="1"> Keep the oven door closed</label><br>
+        <label><input type="radio" name="q5" value="0"> Open the oven door wide</label><br>
+        <label><input type="radio" name="q5" value="0"> Throw water inside the oven</label><br>
+        <label><input type="radio" name="q5" value="0"> Push the oven outside</label>
+      </div>
+
+      <div class="question" data-q="6">
+        <p>6. When should you use a fire extinguisher?</p>
+        <label><input type="radio" name="q6" value="0"> If the room is too hot and too smoky</label><br>
+        <label><input type="radio" name="q6" value="1"> If there are just a few small flames</label><br>
+        <label><input type="radio" name="q6" value="0"> If the fire is too large and out of control</label><br>
+        <label><input type="radio" name="q6" value="0"> If you don’t know what is burning</label>
+      </div>
+
+      <div class="question" data-q="7">
+        <p>7. How many types of fire extinguishers are there?</p>
+        <label><input type="radio" name="q7" value="0"> 1</label><br>
+        <label><input type="radio" name="q7" value="0"> 3</label><br>
+        <label><input type="radio" name="q7" value="1"> 5</label><br>
+        <label><input type="radio" name="q7" value="0"> 7</label>
+      </div>
+
+      <div class="question" data-q="8">
+        <p>8. What are the 5 fire classes?</p>
+        <label><input type="radio" name="q8" value="0"> A, B, C, D, E</label><br>
+        <label><input type="radio" name="q8" value="0"> A, C, D, F, K</label><br>
+        <label><input type="radio" name="q8" value="1"> A, B, C, D, F</label><br>
+        <label><input type="radio" name="q8" value="0"> A, B, C, O, F</label>
+      </div>
+
+      <div class="question" data-q="9">
+        <p>9. The room is full of smoke. What should Mom do?</p>
+        <label><input type="radio" name="q9" value="0"> Close the door and the window and stay in the kitchen</label><br>
+        <label><input type="radio" name="q9" value="1"> Go out of the kitchen</label><br>
+        <label><input type="radio" name="q9" value="0"> Take the cookies out of the oven</label><br>
+        <label><input type="radio" name="q9" value="0"> Stay in the kitchen and call 911</label>
+      </div>
+
+      <div class="question" data-q="10">
+        <p>10. What is a good idea to avoid burning cookies in the future?</p>
+        <label><input type="radio" name="q10" value="1"> Always check the oven regularly</label><br>
+        <label><input type="radio" name="q10" value="0"> Never bake again</label><br>
+        <label><input type="radio" name="q10" value="0"> Leave the oven unattended</label><br>
+        <label><input type="radio" name="q10" value="0"> Guess the cooking time</label>
+      </div>
+
+      <div style="text-align:center;margin-top:8px;">
+        <button type="button" id="submitBtn">Submit</button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Modal backdrop and content -->
+  <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document">
+      <h2 id="modalTitle"></h2>
+      <p id="modalMessage"></p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;">
+        <button id="modalOk">OK</button>
+        <button id="modalRetry" style="display:none;">Retry</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM ready
+    document.addEventListener('DOMContentLoaded', function(){
+      const form = document.getElementById('quizForm');
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalMessage = document.getElementById('modalMessage');
+      const modalOk = document.getElementById('modalOk');
+      const modalRetry = document.getElementById('modalRetry');
+      const submitBtn = document.getElementById('submitBtn');
+      const attemptsEl = document.getElementById('attempts');
+
+      function getAttempts(){return parseInt(localStorage.getItem('quizAttempts')||'0',10)}
+      function setAttempts(n){localStorage.setItem('quizAttempts',String(n)); /* intentionally do not write the phrase to the page */ }
+
+      function openModal(title,msg,showRetry=false){
+        modalTitle.textContent = title;
+        modalMessage.textContent = msg;
+        modalRetry.style.display = showRetry ? 'inline-block' : 'none';
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden','false');
+        modalOk.focus();
+      }
+      function closeModal(){
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden','true');
+        submitBtn.focus();
+      }
+
+      function highlightWrongQuestions(formData){
+        for(let i=1;i<=10;i++){
+          const qDiv = document.querySelector('.question[data-q="'+i+'"]');
+          qDiv.classList.remove('wrong');
+          const selected = formData.get('q'+i);
+          if(selected !== '1') qDiv.classList.add('wrong');
+        }
+      }
+      function clearHighlights(){document.querySelectorAll('.question').forEach(d=>d.classList.remove('wrong'))}
+
+      function checkAnswers(){
+        const data = new FormData(form);
+        let score = 0;
+        for(let i=1;i<=10;i++){ if(data.get('q'+i) === '1') score++; }
+
+        let attempts = getAttempts();
+
+        if(score === 10){
+          // success: show modal
+          openModal('🎉 Congratulations !','The second number of the password is FOUR',false);
+          attempts = 0; setAttempts(attempts);
+          clearHighlights();
+          form.reset();
+        } else {
+          attempts++; setAttempts(attempts);
+          if(attempts >= 2){
+            highlightWrongQuestions(data);
+            openModal('❌ Some answers were not correct','After several attempts the wrong questions are highlighted in red. Réessaie !',true);
+          } else {
+            clearHighlights();
+            form.reset();
+            openModal('❌ Some answers were not correct','Sorry, some answers were not correct, you have to do the quiz again!',true);
+          }
+        }
+      }
+
+      // initialize attempts (keeps internal count but no initial phrase shown)
+      setAttempts(getAttempts());
+
+      // events
+      submitBtn.addEventListener('click', checkAnswers);
+      modalOk.addEventListener('click', closeModal);
+      modalRetry.addEventListener('click', function(){ closeModal(); document.getElementById('quizForm').scrollIntoView({behavior:'smooth'}); });
+
+      // allow keyboard Esc to close modal
+      document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && modal.style.display === 'flex'){ closeModal(); } });
+
+      // accessible: trap focus in modal when open (simple implementation)
+      document.addEventListener('focusin', function(e){ if(modal.style.display === 'flex' && !modal.contains(e.target)){ e.stopPropagation(); modalOk.focus(); } });
+
+      // Snow generation
+      function createSnowflake(){
+        const s = document.createElement('div');
+        s.className = 'snowflake';
+        s.textContent = '❄';
+        const size = 8 + Math.random()*28; s.style.fontSize = size+'px';
+        s.style.left = Math.random()*100 + 'vw';
+        s.style.opacity = (0.4 + Math.random()*0.6).toString();
+        const duration = 6 + Math.random()*10; s.style.animation = 'fall '+duration+'s linear forwards';
+        const swayDur = 2 + Math.random()*4; s.style.animation += ', sway '+swayDur+'s ease-in-out infinite';
+        s.style.transform = 'translateY(-10vh)';
+        document.body.appendChild(s);
+        // remove after animation
+        setTimeout(()=>{ s.remove(); }, (duration+1)*1000);
+      }
+      // create plenty of snow but CPU-friendly
+      setInterval(createSnowflake, 160);
+
+    });
+  </script>
+<script>
+function createSnowflake() {
+  const snowflake = document.createElement("div");
+  snowflake.classList.add("snowflake");
+  snowflake.textContent = "❄";
+  snowflake.style.left = Math.random() * 100 + "vw";
+  snowflake.style.animationDuration = 5 + Math.random() * 5 + "s";
+  snowflake.style.opacity = Math.random();
+  snowflake.style.fontSize = 10 + Math.random() * 20 + "px";
+  document.body.appendChild(snowflake);
+  setTimeout(() => snowflake.remove(), 10000);
+}
+setInterval(createSnowflake, 150);
+</script>
+</body>
+</html>
